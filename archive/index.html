@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>React Internals Analysis</title>
+  <!-- Load React and ReactDOM with development builds that include source maps -->
+  <script src="https://unpkg.com/react@19/cjs/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@19/cjs/react-dom.development.js" crossorigin></script>
+  <!-- Load Babel for JSX support -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .app {
+      border: 1px solid #ccc;
+      padding: 20px;
+      border-radius: 5px;
+    }
+    .child {
+      margin-top: 20px;
+      padding: 15px;
+      background-color: #f5f5f5;
+      border-radius: 5px;
+    }
+    button {
+      padding: 8px 16px;
+      background-color: #0066cc;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0055aa;
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <!-- React component script with JSX -->
+  <script type="text/babel">
+    // Create a context to analyze context internals
+    const AnalysisContext = React.createContext('default value');
+
+    // Component with various hooks to analyze
+    function App() {
+      // useState hook for state management analysis
+      const [count, setCount] = React.useState(0);
+      
+      // useEffect hook for lifecycle analysis
+      React.useEffect(() => {
+        console.log('Effect running, count:', count);
+        
+        return () => {
+          console.log('Effect cleanup');
+        };
+      }, [count]);
+      
+      // useContext hook for context API analysis
+      const contextValue = React.useContext(AnalysisContext);
+      
+      // Event handler to trigger state updates
+      const handleClick = () => {
+        console.log('Before state update');
+        setCount(prevCount => prevCount + 1);
+        console.log('After state update (but before re-render)');
+      };
+      
+      console.log('Rendering App component');
+      
+      return (
+        <div className="app">
+          <h1>React Internals Analysis</h1>
+          <p>Current count: {count}</p>
+          <button onClick={handleClick}>Increment</button>
+          <p>Context value: {contextValue}</p>
+          
+          <AnalysisContext.Provider value={`Provider value (count: ${count})`}>
+            <ChildComponent />
+          </AnalysisContext.Provider>
+        </div>
+      );
+    }
+
+    // Child component to demonstrate props and context passing
+    function ChildComponent() {
+      const contextValue = React.useContext(AnalysisContext);
+      console.log('Rendering Child component');
+      
+      return (
+        <div className="child">
+          <h2>Child Component</h2>
+          <p>Context from provider: {contextValue}</p>
+        </div>
+      );
+    }
+
+    // This will help us analyze React's rendering process
+    console.log('React version:', React.version);
+    console.log('React object:', React);
+
+    const rootElement = document.getElementById('root');
+    const root = ReactDOM.createRoot(rootElement);
+
+    // We can set breakpoints here to step into React's internals
+    root.render(
+      <React.StrictMode>
+        <App />
+      </React.StrictMode>
+    );
+  </script>
+
+  <div style="margin-top: 30px; padding: 20px; background-color: #f0f0f0; border-radius: 5px;">
+    <h2>How to Analyze React Internals</h2>
+    <ol>
+      <li>Open Chrome DevTools (F12 or Cmd+Option+I on Mac)</li>
+      <li>Go to the Sources tab</li>
+      <li>Look for files under the domain unpkg.com</li>
+      <li>Find react.development.js and react-dom.development.js under the cjs directory</li>
+      <li>Set breakpoints in these files to analyze React's internal workings</li>
+    </ol>
+    <h3>Suggested Breakpoints:</h3>
+    <ul>
+      <li>In this page's script: at the root.render() call</li>
+      <li>In App component: at any hook call (useState, useEffect, useContext)</li>
+      <li>In the handleClick function: to see how state updates are processed</li>
+    </ul>
+    <p>When you hit a breakpoint, use "Step Into" (F11) to navigate into React's internal code.</p>
+  </div>
+</body>
+</html> 
